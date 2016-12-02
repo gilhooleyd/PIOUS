@@ -1,0 +1,8 @@
+# Build Files
+config.*
+*.o
+*.a
+
+# Temp Files
+.*.sw*
+*~
