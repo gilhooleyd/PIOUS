@@ -74,14 +74,19 @@ unsigned int MailboxRead ( unsigned int channel )
 
 #define CHARSIZE_X 6
 #define CHARSIZE_Y 10
-#define COLOR_BLACK 0x00000000
+#define COLOR_BLACK 0x55550000
 #define COLOR_WHITE 0xFFFFFFFF
 static unsigned int screenbase;
 static unsigned int fb_x, fb_y, pitch;
+static unsigned char hello[5] = "Hello";
+static unsigned char a[18] = 
+    { 14,21,20,14,5,21,14,0,0,
+	8,20,20,8,21,18,13,0,0 
+};
 
 // this char function assumes that each character is 5 bits across
 // and 9 bits down
-void writechar(int x_loc, int y_loc, char * ch) {
+void writechar(int x_loc, int y_loc, int letter) { //char * ch) {
     unsigned int cursor = screenbase  
         + (x_loc * 5 * 4) 
         + (y_loc * 9 * fb_x * 4);
@@ -99,8 +104,24 @@ void writechar(int x_loc, int y_loc, char * ch) {
 //    image[8] =  0;
 
     // initialize image from the teletext
-    for (r = 0; r < 9; r++)
-        image[r] = teletext[*ch - 32][r];
+    //
+        for (r = 0; r < 9; r++) {
+            int index = r + 9 * letter; 
+            image[r] = a[index];
+        }
+//    if (letter == 1) {
+//        for (r = 0; r < 9; r++) {
+//            int index = r; 
+//            image[r] = a[index];
+//        }
+//    } else {
+//        for (r = 0; r < 9; r++) {
+//            int index = r + 9; 
+//            image[r] = a[index];
+//        }
+//    }
+
+//        image[r] = teletext[*ch - 32][r];
 
     for (c = 0; c < 9; c++) {
         for (r = 4; r >= 0; r--) {
@@ -188,9 +209,14 @@ int notmain ( void )
 //        }
 //    }
 
-    writechar(10, 10, ch);
-    writechar(11, 10, &ch[1]);
-    writechar(11, 14, &ch[2]);
+    writechar(10, 10, 1);
+    if (ch[0] == 'H')
+        writechar(11, 10, 0);
+    if (hello[0] == 'H')
+        writechar(11, 14, 1);
+ //   writechar(10, 10, ch);
+ //   writechar(11, 10, &ch[1]);
+ //   writechar(11, 14, &ch[2]);
 
     // blink a bunch
     while (blink-- > 0 )
