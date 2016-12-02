@@ -24,14 +24,11 @@ vectors.o : vectors.s
 video01.o : video01.c image_data.h
 	$(ARMGNU)-gcc $(COPS) -c video01.c -o video01.o
 
-periph.o : periph.c
-	$(ARMGNU)-gcc $(COPS) -c periph.c -o periph.o
-
-kernel.img : loader vectors.o periph.o video01.o 
-	$(ARMGNU)-ld vectors.o periph.o video01.o -T loader -o video01.elf
+kernel.img : loader vectors.o video01.o 
+	$(ARMGNU)-ld vectors.o video01.o -T loader -o video01.elf
 	$(ARMGNU)-objdump -D video01.elf > video01.list
 	$(ARMGNU)-objcopy video01.elf -O ihex video01.hex
-	$(ARMGNU)-objcopy video01.elf -O binary kernel.img
+	$(ARMGNU)-objcopy video01.elf -O binary kernel7.img
 
 
 
