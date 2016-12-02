@@ -4,7 +4,7 @@
 // for the SD card work with this bootloader.  Change the ARMBASE
 // below to use a different location.
 
-#include "image_data.h"
+#include "teletext.h"
 
 #define MB_ADDR 0x3F00B880
 #define MB_STATUS_OFF 0x18
@@ -72,6 +72,49 @@ unsigned int MailboxRead ( unsigned int channel )
 
 #define MB_STRUCT_ADDR 0x00040000
 
+#define CHARSIZE_X 6
+#define CHARSIZE_Y 10
+#define COLOR_BLACK 0x00000000
+#define COLOR_WHITE 0xFFFFFFFF
+static unsigned int screenbase;
+static unsigned int fb_x, fb_y, pitch;
+
+// this char function assumes that each character is 5 bits across
+// and 9 bits down
+void writechar(int x_loc, int y_loc, char * ch) {
+    unsigned int cursor = screenbase  
+        + (x_loc * 5 * 4) 
+        + (y_loc * 9 * fb_x * 4);
+    unsigned char image[9];
+    int r, c;
+
+//    image[0] = 14;
+//    image[1] = 21;
+//    image[2] = 20;
+//    image[3] = 14;
+//    image[4] =  5;
+//    image[5] = 21;
+//    image[6] = 14;
+//    image[7] =  0;
+//    image[8] =  0;
+
+    // initialize image from the teletext
+    for (r = 0; r < 9; r++)
+        image[r] = teletext[*ch - 32][r];
+
+    for (c = 0; c < 9; c++) {
+        for (r = 4; r >= 0; r--) {
+            if (image[c] & (1 << r))
+                PUT32(cursor, COLOR_WHITE);
+            else
+                PUT32(cursor, COLOR_BLACK);
+            cursor += 4;
+        }
+        cursor -= 4*5;
+        cursor += 4*fb_x;
+    }
+}
+
 int notmain ( void )
 {
     unsigned int ra,rb;
@@ -79,6 +122,7 @@ int notmain ( void )
     unsigned int mb_addr = MB_STRUCT_ADDR;
 
     int blink = 20;
+    char *ch = "Hello World!";
 
     ra=GET32(GPFSEL4);
     ra&=~(7<<21);
@@ -124,22 +168,29 @@ int notmain ( void )
     // read the location of the framebuffer
     rb = GET32(mb_addr + 0x20);
     rb = rb & 0x3FFFFFFF;
+    screenbase = rb;
+    fb_x = WIDTH;
+    fb_y = HEIGHT;
 
-    // write the image
-    ra=0;
-    int black = 1;
-    for (ry = 0; ry < HEIGHT; ry++)
-    {
-        for (rx = 0; rx < WIDTH; rx++)
-        {
-            if (black)
-                PUT32(rb, 0x000000FF);
-            else
-                PUT32(rb, 0xFFFFFFFF);
-            rb += 4;
-            black = 1 - black;
-        }
-    }
+//    // write the image
+//    ra=0;
+//    int black = 1;
+//    for (ry = 0; ry < HEIGHT; ry++)
+//    {
+//        for (rx = 0; rx < WIDTH; rx++)
+//        {
+//            if (black)
+//                PUT32(rb, COLOR_BLACK);
+//            else
+//                PUT32(rb, COLOR_WHITE);
+//            rb += 4;
+//            black = 1 - black;
+//        }
+//    }
+
+    writechar(10, 10, ch);
+    writechar(11, 10, &ch[1]);
+    writechar(11, 14, &ch[2]);
 
     // blink a bunch
     while (blink-- > 0 )

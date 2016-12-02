@@ -21,7 +21,7 @@ clean :
 vectors.o : vectors.s
 	$(ARMGNU)-as vectors.s -o vectors.o
 
-video01.o : video01.c image_data.h
+video01.o : video01.c teletext.h 
 	$(ARMGNU)-gcc $(COPS) -c video01.c -o video01.o
 
 kernel.img : loader vectors.o video01.o 
