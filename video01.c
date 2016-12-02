@@ -23,11 +23,11 @@ extern unsigned int GETPC ( void );
 extern void dummy (unsigned int);
 
 unsigned int toVCAddr( unsigned int addr) {
-    return addr; // + 0x40000000;
+    return addr + 0x40000000;
 }
 
 unsigned int fromVCAddr( unsigned int addr) {
-    return addr - 0x40000000;
+    return addr & 0x3FFFFFFF;
 }
 
 unsigned int MailboxWrite ( unsigned int fbinfo_addr, unsigned int channel )
@@ -62,13 +62,13 @@ unsigned int MailboxRead ( unsigned int channel )
     return(ra);
 }
 
-#define HEIGHT 640 
-#define WIDTH  480 
+#define HEIGHT 480
+#define WIDTH  640 
 
-#define GPFSEL3 0x3F20000C
-#define GPFSEL4 0x3F200010
-#define GPSET1  0x3F200020
-#define GPCLR1  0x3F20002C
+#define GPFSEL3        0x3F20000C
+#define GPFSEL4        0x3F200010
+#define GPSET1         0x3F200020
+#define GPCLR1         0x3F20002C
 
 #define MB_STRUCT_ADDR 0x00040000
 
@@ -93,13 +93,13 @@ int notmain ( void )
 
     mb_addr = MB_STRUCT_ADDR;
     // create the structure to be passed to the mailbox
-    PUT32(mb_addr, HEIGHT); /* #0 Physical Width */
+    PUT32(mb_addr, WIDTH); /* #0 Physical Width */
     mb_addr += 4;
-    PUT32(mb_addr, WIDTH);  /* #4 Physical Height */
+    PUT32(mb_addr, HEIGHT);  /* #4 Physical Height */
     mb_addr += 4;
-    PUT32(mb_addr, HEIGHT); /* #8 Virtual Width */
+    PUT32(mb_addr, WIDTH); /* #8 Virtual Width */
     mb_addr += 4;
-    PUT32(mb_addr, WIDTH);  /* #12 Virtual Height */
+    PUT32(mb_addr, HEIGHT);  /* #12 Virtual Height */
     mb_addr += 4;
     PUT32(mb_addr, 0);      /* #16 GPU - Pitch */
     mb_addr += 4;
@@ -112,6 +112,8 @@ int notmain ( void )
     PUT32(mb_addr, 0);      /* #32 GPU - Pointer */
     mb_addr += 4;
     PUT32(mb_addr, 0);      /* #36 GPU - Size */
+
+    // set address back to normal
     mb_addr = MB_STRUCT_ADDR;
 
 
@@ -121,16 +123,21 @@ int notmain ( void )
 
     // read the location of the framebuffer
     rb = GET32(mb_addr + 0x20);
-    rb = fromVCAddr(rb);
+    rb = rb & 0x3FFFFFFF;
 
     // write the image
     ra=0;
+    int black = 1;
     for (ry = 0; ry < HEIGHT; ry++)
     {
         for (rx = 0; rx < WIDTH; rx++)
         {
-            PUT32(rb, image_data[ra++]);
+            if (black)
+                PUT32(rb, 0x000000FF);
+            else
+                PUT32(rb, 0xFFFFFFFF);
             rb += 4;
+            black = 1 - black;
         }
     }
 
