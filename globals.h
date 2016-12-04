@@ -8,14 +8,6 @@
 #define GLOBALS_H
 
 
-/* Access to our assembly methods */
-extern void PUT32 (unsigned int, unsigned int);
-extern void PUT16 (unsigned int, unsigned int);
-extern void PUT8  (unsigned int, unsigned int);
-extern unsigned int GET32 (unsigned int);
-extern unsigned int GETPC (void);
-extern void dummy (unsigned int);
-
 /* "Null" reference value, for convenience */
 #define NULL ((void *) 0)
 
@@ -25,9 +17,21 @@ typedef enum {
     TRUE
 } bool_t;
 
-/* Shorthand for commonly used types */
-typedef unsigned int uint;
-typedef unsigned long ulong;
+
+/* Method exit return values */
+enum {
+    SUCCESS,
+    FAILURE
+};
+
+
+/* Forward declare our assembly methods */
+extern void PUT32 (unsigned int dst_addr, unsigned int data);
+extern void PUT16 (unsigned int dst_addr, unsigned int data);
+extern void PUT8  (unsigned int dst_addr, unsigned int data);
+extern unsigned int GET32 (unsigned int src_addr);
+extern unsigned int GETPC (void);
+extern void dummy (unsigned int loops);
 
 
 #endif

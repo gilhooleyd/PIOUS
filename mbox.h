@@ -1,6 +1,6 @@
 /* mbox.h
  *
- * Description: Library for Pi 2 mailbox interfacing.
+ * Description: Module for interfacing with Pi 2's mailboxes.
  * Current version only supports reading/writing to mailbox 0.
  */
 
@@ -22,9 +22,6 @@ enum
 
     // Bit 31 is set in status register if write mailbox is full
     MBOX_IS_FULL    = 0x80000000,
-
-    // Mailbox frame buffer channel
-    MBOX_FB_CHANNEL = 0x1,
 
     // Status register offset for mailbox 0
     MBOX0_STATUS_OFFSET = 0x18,

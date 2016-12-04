@@ -1,6 +1,6 @@
-/* mbox.h
+/* mbox.c
  *
- * Description: Library for Pi 2 mailbox interfacing.
+ * Description: Module for interfacing with Pi 2's mailboxes.
  * Current version only supports reading/writing to mailbox 0.
  */
 
