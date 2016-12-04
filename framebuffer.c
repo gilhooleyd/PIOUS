@@ -51,7 +51,7 @@ bool_t fb_init(void)
     mbox_read(MBOX_FB_CHANNEL);
 
     // Read the frame buffer location (must subtract VC's
-    // start address to get the actual memory location(
+    // start address to get the actual memory location)
     fb_addr = fb_info_ptr->fb_addr - VC_START_ADDR;
 
     // If frame buffer address was modified, initialization successful
