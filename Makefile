@@ -23,6 +23,9 @@ OOPS   = -std-compile-opts
 
 #----- Make Commands -----#
 
+# (Lance) wha??
+gcc: kernel.img
+
 all: gcc clang
 
 clean:
@@ -38,8 +41,6 @@ clean:
 
 #----- Products -----#
 
-gcc: kernel.img
-
 clang: start.bin
 
 kernel.img: loader start.o globals.o framebuffer.o led.o mbox.o utils.o
@@ -47,7 +48,7 @@ kernel.img: loader start.o globals.o framebuffer.o led.o mbox.o utils.o
 		-T loader -o start.elf
 	$(ARMGNU)-objdump -D start.elf > start.list
 	$(ARMGNU)-objcopy start.elf -O ihex start.hex
-	$(ARMGNU)-objcopy start.elf -o binary kernel7.img
+	$(ARMGNU)-objcopy start.elf -O binary kernel7.img
 
 start.bc: start.c globals.h framebuffer.h led.h mbox.h utils.h image_data.h
 	clang $(CLOPS) -c start.c -o start.bc

@@ -1,9 +1,9 @@
-; globals.s
-;
-; Description: Helpful methods written in assembly.
+@ globals.s
+@
+@ Description: Helpful methods written in assembly.
 
 
-;      Memory Read/Write convenience functions
+@ Memory Read/Write convenience functions
 .globl PUT32
 PUT32:
 	str r1, [r0]
@@ -25,15 +25,15 @@ GET32:
 	bx  lr
 
 
-;      Gets program counter value
+@ Gets program counter value
 .globl GETPC
 GETPC:
 	mov r0, lr
 	bx  lr
 
 
-;      Dummy function (for preventing code from
-;      being optimized out by the compiler)
+@ Dummy function (for preventing code from
+@ being optimized out by the compiler)
 .globl dummy
 dummy:
 	bx lr
