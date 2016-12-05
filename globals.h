@@ -25,13 +25,13 @@ enum {
 };
 
 
-/* Forward declare our assembly methods */
-extern void PUT32 (unsigned int dst_addr, unsigned int data);
-extern void PUT16 (unsigned int dst_addr, unsigned int data);
-extern void PUT8  (unsigned int dst_addr, unsigned int data);
-extern unsigned int GET32 (unsigned int src_addr);
-extern unsigned int GETPC (void);
-extern void dummy (unsigned int dummy_arg);
+/* Declare our global assembly methods */
+void PUT32 (unsigned int dst_addr, unsigned int data);
+void PUT16 (unsigned int dst_addr, unsigned int data);
+void PUT8  (unsigned int dst_addr, unsigned int data);
+unsigned int GET32 (unsigned int src_addr);
+unsigned int GETPC (void);
+void dummy (unsigned int dummy_arg);
 
 
 #endif

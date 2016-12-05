@@ -7,7 +7,9 @@
 #include "globals.h"
 #include "framebuffer.h"
 #include "led.h"
+
 #include "image_data.h"
+#include "teletext.h"
 
 
 /* Main function for the kernel - never returns */

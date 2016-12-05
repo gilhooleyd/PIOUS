@@ -20,19 +20,21 @@ OOPS   = -std-compile-opts
 # WARNING:
 # (Lance) Beyond here, I dont know what the f*** is going on. Send help.
 
-# What I think is happening:
+# (Lance) What I think is happening:
 # The Makefile never tries to build 'clang', and thus never makes it
 # to building periph.bc or the .clang.elf file (which fails because
-# periph.bc doesn't exist. From what I can tell, only building kernel.img
-# is necessary for this run correctly.
+# periph.bc doesn't exist). From what I can tell, only building kernel.img
+# is necessary for this to run correctly.
 
 
 #----- Make Commands -----#
 
 # (Lance) wha??
-gcc: kernel.img
+#gcc: kernel.img
 
-all: gcc clang
+#all: gcc clang
+
+all: kernel.img
 
 clean:
 	rm -f *.o
@@ -47,42 +49,51 @@ clean:
 
 #----- Products -----#
 
-clang: main.bin
-
-kernel.img: linkscript main.o globals.o framebuffer.o led.o mbox.o utils.o
-	$(ARMGNU)-ld main.o globals.o framebuffer.o led.o mbox.o utils.o \
-		-T linkscript -o main.elf
+kernel.img: linkscript main.o asm_utils.o entry.o framebuffer.o \
+            led.o mbox.o utils.o
+	$(ARMGNU)-ld main.o asm_utils.o entry.o framebuffer.o led.o \
+		mbox.o utils.o -T linkscript -o main.elf
 	$(ARMGNU)-objdump -D main.elf > main.list
 	$(ARMGNU)-objcopy main.elf -O ihex main.hex
 	$(ARMGNU)-objcopy main.elf -O binary kernel7.img
 
-main.bc: main.c globals.h framebuffer.h led.h mbox.h utils.h image_data.h
-	clang $(CLOPS) -c main.c -o main.bc
 
-# (Lance) What the hell is this?!?
-periph.bc: periph.c
-	clang $(CLOPS) -c periph.c -o periph.bc
+# (Lance) beyond here is unnecessary?
 
-main.clang.elf: linkscript main.bc periph.bc globals.o framebuffer.o \
-                led.o mbox.o utils.o
-	llvm-link periph.bc main.bc -o main.nopt.bc
-	opt $(OOPS) main.nopt.bc -o main.opt.bc
-	llc $(LLCOPS) -filetype=obj main.opt.bc -o main.clang.o
-	$(ARMGNU)-ld -o main.clang.elf -T linkscript main.clang.o globals.o \
-		framebuffer.o led.o mbox.o utils.o
-	$(ARMGNU)-objdump -D main.clang.elf > main.clang.list
-
-main.bin: main.clang.elf
-	$(ARMGNU)-objcopy main.clang.elf main.clang.bin -O binary
+#clang: main.bin
+#
+#main.bc: main.c globals.h framebuffer.h led.h mbox.h utils.h \
+#         image_data.h teletext.h
+#	clang $(CLOPS) -c main.c -o main.bc
+#
+## (Lance) What the hell is this?!?
+#periph.bc: periph.c
+#	clang $(CLOPS) -c periph.c -o periph.bc
+#
+#main.clang.elf: linkscript main.bc periph.bc asm_utils.o entry.o \
+#                framebuffer.o led.o mbox.o utils.o
+#	llvm-link periph.bc main.bc -o main.nopt.bc
+#	opt $(OOPS) main.nopt.bc -o main.opt.bc
+#	llc $(LLCOPS) -filetype=obj main.opt.bc -o main.clang.o
+#	$(ARMGNU)-ld -o main.clang.elf -T linkscript main.clang.o \
+#		asm_utils.o entry.o framebuffer.o led.o mbox.o utils.o
+#	$(ARMGNU)-objdump -D main.clang.elf > main.clang.list
+#
+#main.bin: main.clang.elf
+#	$(ARMGNU)-objcopy main.clang.elf main.clang.bin -O binary
 
 
 #----- Object Files -----#
 
-main.o: main.c globals.h framebuffer.h led.h mbox.h utils.h image_data.h
+main.o: main.c globals.h framebuffer.h led.h mbox.h utils.h \
+        image_data.h teletext.h
 	$(ARMGNU)-gcc $(CCOPS) -c main.c -o main.o
 
-globals.o: globals.s
-	$(ARMGNU)-as globals.s -o globals.o
+asm_utils.o: asm_utils.s
+	$(ARMGNU)-as asm_utils.s -o asm_utils.o
+
+entry.o: entry.s
+	$(ARMGNU)-as entry.s -o entry.o
 
 framebuffer.o: framebuffer.c framebuffer.h globals.h mbox.h
 	$(ARMGNU)-gcc $(CCOPS) -c framebuffer.c -o framebuffer.o
