@@ -1,6 +1,6 @@
-/* start.c
+/* main.c
  *
- * Description: Defines the code entry point.
+ * Description: Defines the kernel main function.
  */
 
 
@@ -10,15 +10,13 @@
 #include "image_data.h"
 
 
-int _start(void)
+/* Main function for the kernel - never returns */
+void kernel_main(void)
 {
     unsigned int x, y;
     unsigned int pixel_addr;
     unsigned int pixel_index;
     int num_blinks;
-
-    // Reserve 0x8000 space on the stack
-    asm("mov sp, #0x8000");
 
     // Initialize modules
     fb_init();

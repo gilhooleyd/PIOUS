@@ -31,7 +31,7 @@ extern void PUT16 (unsigned int dst_addr, unsigned int data);
 extern void PUT8  (unsigned int dst_addr, unsigned int data);
 extern unsigned int GET32 (unsigned int src_addr);
 extern unsigned int GETPC (void);
-extern void dummy (unsigned int loops);
+extern void dummy (unsigned int dummy_arg);
 
 
 #endif

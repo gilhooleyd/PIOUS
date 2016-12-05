@@ -1,0 +1,29 @@
+/* linkscript
+ *
+ * Description: Custom linker script for the kernel.
+ *              Defines memory and section locations.
+ */
+
+
+/* Define kernel entry point */
+ENTRY(_start)
+
+/* Usable memory begins at 0x8000, and is 0x1000000 *
+ * long. (Certainly enough for our purposes.)       */
+MEMORY
+{
+    ram : ORIGIN = 0x8000, LENGTH = 0x1000000
+}
+
+/* Put .text (kernel source code) and .bss (static *
+ * data) sections in memory for now.               *
+ *                                                 *
+ * TODO: .bss needs to be initialized to zero.     *
+ *       Other sections need to be added.          *
+ *       Everything should be 4K aligned.          */
+SECTIONS
+{
+    .text : { *(.text*) } > ram
+    .bss : { *(.bss*) } > ram
+}
+
