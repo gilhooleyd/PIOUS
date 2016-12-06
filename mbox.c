@@ -32,7 +32,8 @@ unsigned int mbox_read(unsigned int channel)
             break;
     }
 
-    return data;
+    // Return the actual data (upper 28 bits)
+    return data >> 4;
 }
 
 

@@ -19,9 +19,6 @@ enum
     // Mailbox frame buffer channel
     MBOX_FB_CHANNEL = 0x1,
 
-    // Address of frame buffer info struct
-    FB_INFO_ADDR    = 0x00040000,
-
     // Frame buffer width in pixels
     FB_WIDTH    = 640,
 
@@ -32,7 +29,7 @@ enum
 
 /* Defines the parameters of the frame buffer. *
  * Gets passed to and modified by the GPU.     */
-struct fb_info
+struct fb_info_t
 {
     // Width of the requested frame buffer
     unsigned int width;
@@ -64,14 +61,14 @@ struct fb_info
     // Size of the frame buffer (set by GPU)
     unsigned int size;
 };
-typedef struct fb_info fb_info;
+typedef struct fb_info_t fb_info_t;
 
 
 /* Frame buffer methods */
 bool_t fb_init(void);
 bool_t fb_is_initialized(void);
 
-fb_info *fb_get_info(void);
+fb_info_t *fb_get_info(void);
 unsigned int fb_get_addr(void);
 
 

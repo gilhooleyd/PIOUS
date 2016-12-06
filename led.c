@@ -20,9 +20,6 @@ bool_t led_init(void)
 {
     unsigned int ra;
 
-    if (is_initialized)
-        return TRUE;
-
     // TODO: Someone else please explain what's going
     // on, or re-write to make more sense :(
 

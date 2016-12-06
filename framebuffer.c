@@ -11,8 +11,8 @@
 /* Whether this module is initialized */
 static bool_t is_initialized;
 
-/* Pointer to the frame buffer info structure */
-static fb_info *fb_info_ptr;
+/* Frame buffer info structure */
+static fb_info_t fb_info;
 
 /* Frame buffer address */
 static unsigned int fb_addr;
@@ -25,34 +25,31 @@ bool_t fb_init(void)
 {
     unsigned int fb_info_addr;
 
-    if (is_initialized)
-        return TRUE;
-
-    // Set the info pointer to the designated spot in memory
-    fb_info_addr = FB_INFO_ADDR;
-    fb_info_ptr  = (fb_info *) fb_info_addr;
+    // Get the address of the fb info struct
+    fb_info_addr = (unsigned int) &fb_info;
 
     // Fill the info structure with data
-    fb_info_ptr->width = FB_WIDTH;
-    fb_info_ptr->height = FB_HEIGHT;
-    fb_info_ptr->virtual_width = FB_WIDTH;
-    fb_info_ptr->virtual_height = FB_HEIGHT;
-    fb_info_ptr->pitch = 0;
-    fb_info_ptr->depth = 32;
-    fb_info_ptr->x_offset = 0;
-    fb_info_ptr->y_offset = 0;
-    fb_info_ptr->fb_addr = 0;
-    fb_info_ptr->size = 0;
+    fb_info.width = FB_WIDTH;
+    fb_info.height = FB_HEIGHT;
+    fb_info.virtual_width = FB_WIDTH;
+    fb_info.virtual_height = FB_HEIGHT;
+    fb_info.pitch = 0;
+    fb_info.depth = 32;
+    fb_info.x_offset = 0;
+    fb_info.y_offset = 0;
+    fb_info.fb_addr = 0;
+    fb_info.size = 0;
 
     // Write info structure address to framebuffer channel
-    mbox_write(MBOX_FB_CHANNEL, fb_info_addr);
+    // (Need to add VC_START_ADDR for video core address)
+    mbox_write(MBOX_FB_CHANNEL, fb_info_addr + VC_START_ADDR);
 
     // Wait for GPU to modify the structure
     mbox_read(MBOX_FB_CHANNEL);
 
-    // Read the frame buffer location (must subtract VC's
-    // start address to get the actual memory location)
-    fb_addr = fb_info_ptr->fb_addr - VC_START_ADDR;
+    // Read the frame buffer location
+    // (Need to subtract VC_START_ADDR since it came from video core)
+    fb_addr = fb_info.fb_addr - VC_START_ADDR;
 
     // If frame buffer address was modified, initialization successful
     is_initialized = (fb_addr != 0);
@@ -68,11 +65,11 @@ bool_t fb_is_initialized(void)
 
 
 /* Returns the modified frame buffer info structure */
-fb_info *fb_get_info(void)
+fb_info_t *fb_get_info(void)
 {
     if (!is_initialized)
         return NULL;
-    return fb_info_ptr;
+    return &fb_info;
 }
 
 

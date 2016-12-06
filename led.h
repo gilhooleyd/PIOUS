@@ -17,7 +17,7 @@ enum
 {
     // GPIO function select pin addresses
     GPFSEL3 = 0x3F20000C,
-    GPFSEL4 = 0x3f200010,
+    GPFSEL4 = 0x3F200010,
 
     // GPIO pin set and clear addresses
     GPSET1  = 0x3F200020,
