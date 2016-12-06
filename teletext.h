@@ -1,3 +1,13 @@
+/* teletext.h
+ *
+ * Description: Contains the bitmaps for all characters
+ */
+
+
+#ifndef SCREEN_H
+#define SCREEN_H
+
+
 // Character definitions from SAA5050 datasheet
 // Each character is a 5x9 bit matrix
 // 9 rows of 5-bit numbers
@@ -100,3 +110,6 @@ static unsigned char teletext[][9] = {
 	{ 31,31,31,31,31,31,31,0,0 }	// character-sized block
 					//		not defined in ASCII
 };
+
+
+#endif

@@ -20,6 +20,9 @@ OOPS   = -std-compile-opts
 
 all: kernel.img
 
+test: test.o
+	gcc test.o -o test
+
 clean:
 	rm -f *.o
 	rm -f *.bin
@@ -29,14 +32,15 @@ clean:
 	rm -f *.img
 	rm -f *.bc
 	rm -f *.clang.s
+	rm -f test
 
 
 #----- Products -----#
 
 kernel.img: linkscript main.o asm_utils.o entry.o framebuffer.o \
-            led.o mbox.o utils.o
+            led.o mbox.o screen.o utils.o
 	$(ARMGNU)-ld entry.o main.o asm_utils.o framebuffer.o led.o \
-		mbox.o utils.o -T linkscript -o main.elf
+		mbox.o screen.o utils.o -T linkscript -o main.elf
 	$(ARMGNU)-objdump -D main.elf > main.list
 	$(ARMGNU)-objcopy main.elf -O ihex main.hex
 	$(ARMGNU)-objcopy main.elf -O binary kernel7.img
@@ -44,8 +48,8 @@ kernel.img: linkscript main.o asm_utils.o entry.o framebuffer.o \
 
 #----- Object Files -----#
 
-main.o: main.c globals.h framebuffer.h led.h mbox.h utils.h \
-        image_data.h teletext.h
+main.o: main.c globals.h framebuffer.h led.h mbox.h screen.h \
+        utils.h image_data.h
 	$(ARMGNU)-gcc $(CCOPS) -c main.c -o main.o
 
 asm_utils.o: asm_utils.s
@@ -63,5 +67,11 @@ led.o: led.c led.h globals.h
 mbox.o: mbox.c mbox.h globals.h
 	$(ARMGNU)-gcc $(CCOPS) -c mbox.c -o mbox.o
 
+screen.o: screen.c screen.h teletext.h
+	$(ARMGNU)-gcc $(CCOPS) -c screen.c -o screen.o
+
 utils.o: utils.c utils.h globals.h
 	$(ARMGNU)-gcc $(CCOPS) -c utils.c -o utils.o
+
+test.o: test.c teletext.h
+	gcc -c test.c -o test.o
