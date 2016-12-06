@@ -1,7 +1,13 @@
 # Build Files
-config.*
-*.o
 *.a
+*.bc
+*.bin
+*.clang.s
+*.elf
+*.hex
+*.img
+*.list
+*.o
 
 # Temp Files
 .*.sw*

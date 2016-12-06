@@ -1,5 +1,14 @@
+/* test.c
+ *
+ * Description: This file is for testing bits of
+ * C code on the host machine (as in, its okay to
+ * import stdio.h and other sane libraries here)
+ */
+
+
 #include "teletext.h"
 #include <stdio.h>
+
 
 // this char function assumes that each character is 5 bits across
 // and 9 bits down
@@ -21,6 +30,7 @@ void writechar(int x_loc, int y_loc, char * ch) {
         printf("\n");
     }
 }
+
 
 int main(void) {
     char *ch = "Hello World";

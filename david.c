@@ -1,3 +1,9 @@
+/* david.c
+ *
+ * (Lance) This file is the video01.c file from the old
+ * master branch. I included it here so David wouldn't get mad.
+ */
+
 // The raspberry pi firmware at the time this was written defaults
 // loading at address 0x8000.  Although this bootloader could easily
 // load at 0x0000, it loads at 0x8000 so that the same binaries built
@@ -141,6 +147,7 @@ int notmain ( void )
     unsigned int ra,rb;
     unsigned int ry,rx;
     unsigned int mb_addr = MB_STRUCT_ADDR;
+    int i;
 
     int blink = 20;
     char *ch = "Hello World!";
@@ -209,6 +216,7 @@ int notmain ( void )
 //        }
 //    }
 
+/*
     writechar(10, 10, 1);
     if (ch[0] == 'H')
         writechar(11, 10, 0);
@@ -217,6 +225,20 @@ int notmain ( void )
  //   writechar(10, 10, ch);
  //   writechar(11, 10, &ch[1]);
  //   writechar(11, 14, &ch[2]);
+*/
+
+    // Print a string!
+    for (i = 0; i < 5; i++)
+    {
+        PUT32(GPSET1,1<<(47-32));
+        PUT32(GPCLR1,1<<(35-32));
+        for(ra=0;ra<0x100000;ra++) dummy(ra);
+        PUT32(GPCLR1,1<<(47-32));
+        PUT32(GPSET1,1<<(35-32));
+        for(ra=0;ra<0x100000;ra++) dummy(ra);
+
+        writechar(10+i, 10, ch[i]);
+    }
 
     // blink a bunch
     while (blink-- > 0 )
@@ -231,3 +253,4 @@ int notmain ( void )
 
     return(0);
 }
+

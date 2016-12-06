@@ -1,0 +1,67 @@
+/* linkscript
+ *
+ * Description: Custom linker script for the kernel.
+ *              Defines memory and section locations.
+ */
+
+
+/* Defines the entry point for the kernel */
+ENTRY(_start)
+
+
+SECTIONS
+{
+    /* Start memory at 0x8000 */    
+    . = 0x8000;
+    __start = .;
+    
+    
+    /* START .text (kernel code) SECTION */
+    __text_start = .;
+    .text :
+    {
+        /* Put boot section (in entry.s) first */
+        KEEP(*(.text.boot))
+
+        /* Then include the rest of the .text section*/
+        *(.text)
+    }
+
+    /* Align to page size */
+    . = ALIGN(4096);
+    __text_end = .;
+ 
+
+    /* START .rodata (read-only data) SECTION */
+    __rodata_start = .;
+    .rodata :
+    {
+        *(.rodata)
+    }
+    . = ALIGN(4096);
+    __rodata_end = .;
+ 
+
+    /* Start .data (dynamic allocations) SECTION */
+    __data_start = .;
+    .data :
+    {
+        *(.data)
+    }
+    . = ALIGN(4096);
+    __data_end = .;
+ 
+
+    /* Start .bss (static allocations) SECTION */
+    __bss_start = .;
+    .bss :
+    {
+        bss = .;
+        *(.bss)
+    }
+    . = ALIGN(4096);
+    __bss_end = .;
+
+
+    __end = .;
+}

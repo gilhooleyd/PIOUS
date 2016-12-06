@@ -1,13 +1,29 @@
+# PiOuS Makefile
+#
+# TODO: Having a DEBUG flag that disabled compiler optimization
+#       and enabled a debugf function or something would be nice.
+
+
+#----- Macros and options -----#
 
 ARMGNU ?= arm-none-eabi
 
-COPS = -Wall -O2 -nostdlib -nostartfiles -ffreestanding -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7-a -mtune=cortex-a7
+CCOPS  = -Wall -nostdlib -nostartfiles -ffreestanding \
+         -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7-a \
+         -mtune=cortex-a7
+CLOPS  = -Wall -m32 -emit-llvm
+LLCOPS = -march=arm -mcpu=arm1176jzf-s
+OOPS   = -std-compile-opts
 
-gcc : kernel.img
 
-all : gcc clang
+#----- Make Commands -----#
 
-clean :
+all: kernel.img
+
+test: test.o
+	gcc test.o -o test
+
+clean:
 	rm -f *.o
 	rm -f *.bin
 	rm -f *.hex
@@ -16,50 +32,46 @@ clean :
 	rm -f *.img
 	rm -f *.bc
 	rm -f *.clang.s
+	rm -f test
 
 
-vectors.o : vectors.s
-	$(ARMGNU)-as vectors.s -o vectors.o
+#----- Products -----#
 
-video01.o : video01.c teletext.h 
-	$(ARMGNU)-gcc $(COPS) -c video01.c -o video01.o
-
-kernel.img : loader vectors.o video01.o 
-	$(ARMGNU)-ld vectors.o video01.o -T loader -o video01.elf
-	$(ARMGNU)-objdump -D video01.elf > video01.list
-	$(ARMGNU)-objcopy video01.elf -O ihex video01.hex
-	$(ARMGNU)-objcopy video01.elf -O binary kernel7.img
+kernel.img: linkscript main.o asm_utils.o entry.o framebuffer.o \
+            led.o mbox.o screen.o utils.o
+	$(ARMGNU)-ld entry.o main.o asm_utils.o framebuffer.o led.o \
+		mbox.o screen.o utils.o -T linkscript -o main.elf
+	$(ARMGNU)-objdump -D main.elf > main.list
+	$(ARMGNU)-objcopy main.elf -O ihex main.hex
+	$(ARMGNU)-objcopy main.elf -O binary kernel7.img
 
 
+#----- Object Files -----#
 
+main.o: main.c globals.h framebuffer.h led.h mbox.h screen.h \
+        utils.h image_data.h
+	$(ARMGNU)-gcc $(CCOPS) -c main.c -o main.o
 
+asm_utils.o: asm_utils.s
+	$(ARMGNU)-as asm_utils.s -o asm_utils.o
 
+entry.o: entry.s
+	$(ARMGNU)-as entry.s -o entry.o
 
-LOPS = -Wall -m32 -emit-llvm
-LLCOPS0 = -march=arm 
-LLCOPS1 = -march=arm -mcpu=arm1176jzf-s
-LLCOPS = $(LLCOPS1)
-COPS = -Wall  -O2 -nostdlib -nostartfiles -ffreestanding
-OOPS = -std-compile-opts
+framebuffer.o: framebuffer.c framebuffer.h globals.h mbox.h
+	$(ARMGNU)-gcc $(CCOPS) -c framebuffer.c -o framebuffer.o
 
-clang : video01.bin
+led.o: led.c led.h globals.h
+	$(ARMGNU)-gcc $(CCOPS) -c led.c -o led.o
 
-video01.bc : video01.c image_data.h
-	clang $(LOPS) -c video01.c -o video01.bc
+mbox.o: mbox.c mbox.h globals.h
+	$(ARMGNU)-gcc $(CCOPS) -c mbox.c -o mbox.o
 
-periph.bc : periph.c
-	clang $(LOPS) -c periph.c -o periph.bc
+screen.o: screen.c screen.h teletext.h
+	$(ARMGNU)-gcc $(CCOPS) -c screen.c -o screen.o
 
-video01.clang.elf : loader vectors.o video01.bc periph.bc
-	llvm-link periph.bc video01.bc -o video01.nopt.bc
-	opt $(OOPS) video01.nopt.bc -o video01.opt.bc
-	#llc $(LLCOPS) video01.opt.bc -o video01.clang.s
-	#$(ARMGNU)-as video01.clang.s -o video01.clang.o
-	llc $(LLCOPS) -filetype=obj video01.opt.bc -o video01.clang.o
-	$(ARMGNU)-ld -o video01.clang.elf -T loader vectors.o video01.clang.o
-	$(ARMGNU)-objdump -D video01.clang.elf > video01.clang.list
+utils.o: utils.c utils.h globals.h
+	$(ARMGNU)-gcc $(CCOPS) -c utils.c -o utils.o
 
-video01.bin : video01.clang.elf
-	$(ARMGNU)-objcopy video01.clang.elf video01.clang.bin -O binary
-
-
+test.o: test.c teletext.h
+	gcc -c test.c -o test.o
