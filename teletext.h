@@ -4,8 +4,8 @@
  */
 
 
-#ifndef SCREEN_H
-#define SCREEN_H
+#ifndef TELETEXT_H
+#define TELETEXT_H
 
 
 // Character definitions from SAA5050 datasheet

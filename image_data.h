@@ -6,8 +6,8 @@
  */
 
 
-#ifndef SCREEN_H
-#define SCREEN_H
+#ifndef IMAGE_DATA_H
+#define IMAGE_DATA_H
 
 
 const unsigned int image_data[480*480*4]=
