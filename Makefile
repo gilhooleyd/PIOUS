@@ -15,6 +15,20 @@ CLOPS  = -Wall -m32 -emit-llvm
 LLCOPS = -march=arm -mcpu=arm1176jzf-s
 OOPS   = -std-compile-opts
 
+#----- qemu commands -----#
+q-entry: qemu/entry.s
+	$(ARMGNU)-as -mcpu=arm926ej-s qemu/entry.s -o qemu/entry.o
+
+q-img: qemu/test.c 
+	$(ARMGNU)-gcc -c -mcpu=arm926ej-s -g qemu/test.c -o qemu/test.o 
+
+q-elf: q-img q-entry
+	$(ARMGNU)-ld -T qemu/linker.ld qemu/test.o qemu/entry.o -o qemu/kernel.elf
+
+q-bin: q-elf
+	$(ARMGNU)-objcopy -O binary qemu/kernel.elf qemu/kernel.bin
+
+q-all: q-bin
 
 #----- Make Commands -----#
 
