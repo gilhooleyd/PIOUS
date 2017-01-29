@@ -6,23 +6,28 @@
 
 #----- User Variables (EDIT THESE) -----#
 
-ARMGNU ?= arm-none-eabi-
+ARMGNU ?= arm-none-eabi
 
-PI_CC_OPS   := -Wall -nostdlib -nostartfiles -ffreestanding \
-         	   -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7-a \
-         	   -mtune=cortex-a7
-PI_S_OPS    :=
-QEMU_CC_OPS := -m32 -std=gnu99 -ffreestanding -O2 -Wextra -Wall
-QEMU_S_OPS  := --32
+ARM_CC_OPS := -Wall -nostdlib -nostartfiles -ffreestanding \
+         	  -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7-a \
+         	  -mtune=cortex-a7
+ARM_S_OPS  :=
+X86_CC_OPS := -m32 -std=gnu99 -ffreestanding -O2 -Wextra -Wall
+X86_S_OPS  := --32
+
+INC_DIR := include
+
+ARM_SRC_DIR := arch/arm
+X86_SRC_DIR := arch/x86
 
 PI_BUILD_DIR   := build_pi
 QEMU_BUILD_DIR := build_qemu
 
-PI_SRC   := arch/arm/boot.s main.c arch/arm/asm_utils.s framebuffer.c led.c mbox.c \
-			screen.c utils.c
-QEMU_SRC := arch/x86/boot.s arch/x86/kernel.c
+PI_SRC   := $(ARM_SRC_DIR)/boot.s $(ARM_SRC_DIR)/main.c \
+			$(ARM_SRC_DIR)/asm_utils.s framebuffer.c led.c \
+			mbox.c screen.c utils.c
+QEMU_SRC := $(X86_SRC_DIR)/boot.s $(X86_SRC_DIR)/kernel.c
 
-INC := -I./include
 
 #----- Derived Variables (LEAVE ALONE) -----#
 
@@ -40,7 +45,7 @@ QEMU_TARGET := $(QEMU_BUILD_DIR)/kernel
 
 #----- Make Commands -----#
 
-all: pi qemu 
+all: pi qemu
 
 pi: kernel7.img
 
@@ -65,30 +70,30 @@ clean:
 
 #----- Products -----#
 
-kernel7.img: $(PI_BUILD_OBJS) arch/arm/linker 
-	$(ARMGNU)ld $(PI_BUILD_OBJS) -T arch/arm/linker -o $(PI_TARGET).elf
-	$(ARMGNU)objdump -D $(PI_TARGET).elf > $(PI_TARGET).list
-	$(ARMGNU)objcopy $(PI_TARGET).elf -O ihex $(PI_TARGET).hex
-	$(ARMGNU)objcopy $(PI_TARGET).elf -O binary kernel7.img
+kernel7.img: $(PI_BUILD_OBJS) $(ARM_SRC_DIR)/linker
+	$(ARMGNU)-ld $(PI_BUILD_OBJS) -T $(ARM_SRC_DIR)/linker -o $(PI_TARGET).elf
+	$(ARMGNU)-objdump -D $(PI_TARGET).elf > $(PI_TARGET).list
+	$(ARMGNU)-objcopy $(PI_TARGET).elf -O ihex $(PI_TARGET).hex
+	$(ARMGNU)-objcopy $(PI_TARGET).elf -O binary kernel7.img
 
-kernel.bin: $(QEMU_BUILD_OBJS) arch/x86/linker
-	ld -melf_i386 -T arch/x86/linker $(QEMU_BUILD_OBJS) -o $(QEMU_TARGET).elf
-#	$(ARMGNU)-objdump -D $(QEMU_TARGET).elf > $(QEMU_TARGET).list
-#	$(ARMGNU)-objcopy $(QEMU_TARGET).elf -O ihex $(QEMU_TARGET).hex
-#	$(ARMGNU)-objcopy $(QEMU_TARGET).elf -O binary kernel.bin
+kernel.bin: $(QEMU_BUILD_OBJS) $(X86_SRC_DIR)/linker
+	ld -melf_i386 -T $(X86_SRC_DIR)/linker $(QEMU_BUILD_OBJS) -o $(QEMU_TARGET).elf
+	objdump -D $(QEMU_TARGET).elf > $(QEMU_TARGET).list
+	objcopy $(QEMU_TARGET).elf -O ihex $(QEMU_TARGET).hex
+	objcopy $(QEMU_TARGET).elf -O binary kernel.bin
 
 
 #----- Track Dependencies -----#
 
 .pi-depend: $(PI_SRC)
 	rm -f .pi-depend
-	$(ARMGNU)gcc $(PI_CC_OPS) $(INC) -MM $^ > ./.pi-depend
+	$(ARMGNU)-gcc $(ARM_CC_OPS) -I $(INC_DIR) -MM $^ > ./.pi-depend
 	sed -i.bak 's .*.o $(PI_BUILD_DIR)/& ' .pi-depend
 	rm -f .pi-depend.bak
 
 .qemu-depend: $(QEMU_SRC)
 	rm -f .qemu-depend
-	gcc $(QEMU_CC_OPS) $(INC) -MM $^ > ./.qemu-depend
+	gcc $(X86_CC_OPS) -I $(INC_DIR) -MM $^ > ./.qemu-depend
 	sed -i.bak 's .*.o $(QEMU_BUILD_DIR)/& ' .qemu-depend
 	rm -f .qemu-depend.bak
 
@@ -98,21 +103,22 @@ kernel.bin: $(QEMU_BUILD_OBJS) arch/x86/linker
 #----- Object Files -----#
 
 $(PI_BUILD_DIR)/%.o: %.c | $(PI_BUILD_DIR)
-	$(ARMGNU)gcc $(PI_CC_OPS) $(INC) -c $< -o $@
+	$(ARMGNU)-gcc $(ARM_CC_OPS) -I $(INC_DIR) -c $< -o $@
 
 $(PI_BUILD_DIR)/%.o: %.s | $(PI_BUILD_DIR)
-	$(ARMGNU)as $(PI_S_OPS) $(INC) $< -o $@
+	$(ARMGNU)-as $(ARM_S_OPS) -I $(INC_DIR) $< -o $@
 
 $(QEMU_BUILD_DIR)/%.o: %.c | $(QEMU_BUILD_DIR)
-	gcc $(QEMU_CC_OPS) $(INC) -c $< -o $@
+	gcc $(X86_CC_OPS) -I $(INC_DIR) -c $< -o $@
 
 $(QEMU_BUILD_DIR)/%.o: %.s | $(QEMU_BUILD_DIR)
-	as $(QEMU_S_OPS) $(INC) $< -o $@
+	as $(X86_S_OPS) -I $(INC_DIR) $< -o $@
+
 
 #----- Build Directories -----$
 
 $(PI_BUILD_DIR):
-	mkdir -p $(PI_BUILD_DIR)/arch/arm/
+	mkdir -p $(PI_BUILD_DIR)/$(ARM_SRC_DIR)
 
 $(QEMU_BUILD_DIR):
-	mkdir -p $(QEMU_BUILD_DIR)/arch/x86
+	mkdir -p $(QEMU_BUILD_DIR)/$(X86_SRC_DIR)

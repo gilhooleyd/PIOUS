@@ -20,7 +20,7 @@ SECTIONS
     __text_start = .;
     .text :
     {
-        /* Put boot section (in entry.s) first */
+        /* Put boot section (in boot.s) first */
         KEEP(*(.text.boot))
 
         /* Then include the rest of the .text section*/
