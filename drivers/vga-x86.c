@@ -1,16 +1,6 @@
-/* Surely you will remove the processor conditionals and this comment
-   appropriately depending on whether or not you use C++. */
-#if !defined(__cplusplus)
-#include <stdbool.h> /* C doesn't have booleans by default. */
-#endif
 #include <stddef.h>
 #include <stdint.h>
- 
-/* This tutorial will only work for the 32-bit ix86 targets. */
-#if !defined(__i386__)
-#error "This tutorial needs to be compiled with a ix86-elf compiler"
-#endif
- 
+
 /* Hardware text mode color constants. */
 enum vga_color {
 	VGA_COLOR_BLACK = 0,
@@ -30,7 +20,7 @@ enum vga_color {
 	VGA_COLOR_LIGHT_BROWN = 14,
 	VGA_COLOR_WHITE = 15,
 };
- 
+
 static inline uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg) {
 	return fg | bg << 4;
 }
@@ -92,15 +82,4 @@ void terminal_write(const char* data, size_t size) {
  
 void terminal_writestring(const char* data) {
 	terminal_write(data, strlen(data));
-}
- 
-#if defined(__cplusplus)
-extern "C" /* Use C linkage for kernel_main. */
-#endif
-void kernel_main(void) {
-	/* Initialize terminal interface */
-	terminal_initialize();
- 
-	/* Newline support is left as an exercise. */
-	terminal_writestring("Hello, kernel World!\n");
 }

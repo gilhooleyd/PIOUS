@@ -23,10 +23,11 @@ X86_SRC_DIR := arch/x86
 PI_BUILD_DIR   := build_pi
 QEMU_BUILD_DIR := build_qemu
 
-PI_SRC   := $(ARM_SRC_DIR)/boot.s $(ARM_SRC_DIR)/main.c \
-			$(ARM_SRC_DIR)/asm_utils.s framebuffer.c led.c \
-			mbox.c screen.c utils.c
-QEMU_SRC := $(X86_SRC_DIR)/boot.s $(X86_SRC_DIR)/kernel.c
+
+PI_SRC   := $(ARM_SRC_DIR)/boot.s main.c $(ARM_SRC_DIR)/asm_utils.s framebuffer.c led.c mbox.c \
+			screen.c utils.c drivers/tty-stub.c
+QEMU_SRC   := $(X86_SRC_DIR)/boot.s main.c  drivers/led-stub.c \
+			utils.c drivers/vga-x86.c
 
 
 #----- Derived Variables (LEAVE ALONE) -----#
@@ -119,6 +120,8 @@ $(QEMU_BUILD_DIR)/%.o: %.s | $(QEMU_BUILD_DIR)
 
 $(PI_BUILD_DIR):
 	mkdir -p $(PI_BUILD_DIR)/$(ARM_SRC_DIR)
+	mkdir -p $(PI_BUILD_DIR)/drivers
 
 $(QEMU_BUILD_DIR):
 	mkdir -p $(QEMU_BUILD_DIR)/$(X86_SRC_DIR)
+	mkdir -p $(QEMU_BUILD_DIR)/drivers
