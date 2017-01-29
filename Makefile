@@ -24,7 +24,7 @@ PI_BUILD_DIR   := build_pi
 QEMU_BUILD_DIR := build_qemu
 
 
-PI_SRC   := $(ARM_SRC_DIR)/boot.s main.c $(ARM_SRC_DIR)/asm_utils.s framebuffer.c led.c mbox.c \
+PI_SRC   := $(ARM_SRC_DIR)/boot.s main.c $(ARM_SRC_DIR)/asm_utils.s framebuffer.c drivers/led-pi2.c mbox.c \
 			screen.c utils.c drivers/tty-stub.c
 QEMU_SRC   := $(X86_SRC_DIR)/boot.s main.c  drivers/led-stub.c \
 			utils.c drivers/vga-x86.c

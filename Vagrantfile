@@ -68,6 +68,7 @@ Vagrant.configure(2) do |config|
   config.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
      sudo apt-get -y install qemu-system-arm
+     sudo apt-get -y install qemu-system-x86
      sudo apt-get -y install gcc-arm-none-eabi
      sudo apt-get -y install gdb-arm-none-eabi
   SHELL
