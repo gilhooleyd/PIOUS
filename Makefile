@@ -4,38 +4,51 @@
 #       and enabled a debugf function or something would be nice.
 
 
-#----- Macros and options -----#
+#----- User Variables (EDIT THESE) -----#
 
 ARMGNU ?= arm-none-eabi
 
-CCOPS  = -Wall -nostdlib -nostartfiles -ffreestanding \
-         -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7-a \
-         -mtune=cortex-a7
-CLOPS  = -Wall -m32 -emit-llvm
-LLCOPS = -march=arm -mcpu=arm1176jzf-s
-OOPS   = -std-compile-opts
+PI_CC_OPS   := -Wall -nostdlib -nostartfiles -ffreestanding \
+         	   -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7-a \
+         	   -mtune=cortex-a7
+PI_S_OPS    :=
+QEMU_CC_OPS := -mcpu=arm926ej-s -g
+QEMU_S_OPS  := -mcpu=arm926ej-s
 
-#----- qemu commands -----#
-q-entry: qemu/entry.s
-	$(ARMGNU)-as -mcpu=arm926ej-s qemu/entry.s -o qemu/entry.o
+PI_BUILD_DIR   := pi_build
+QEMU_BUILD_DIR := qemu_build
 
-q-img: qemu/test.c 
-	$(ARMGNU)-gcc -c -mcpu=arm926ej-s -g qemu/test.c -o qemu/test.o 
+PI_SRC   := entry.s main.c asm_utils.s framebuffer.c led.c mbox.c \
+			screen.c utils.c
+QEMU_SRC := qemu-entry.s qemu-test.c
 
-q-elf: q-img q-entry
-	$(ARMGNU)-ld -T qemu/linker.ld qemu/test.o qemu/entry.o -o qemu/kernel.elf
 
-q-bin: q-elf
-	$(ARMGNU)-objcopy -O binary qemu/kernel.elf qemu/kernel.bin
+#----- Derived Variables (LEAVE ALONE) -----#
 
-q-all: q-bin
+PI_INTER_1   := $(PI_SRC:.c=.o)
+PI_INTER_2   := $(PI_INTER_1:.s=.o)
+QEMU_INTER_1 := $(QEMU_SRC:.c=.o)
+QEMU_INTER_2 := $(QEMU_INTER_1:.s=.o)
+
+PI_BUILD_OBJS   := $(addprefix $(PI_BUILD_DIR)/, $(PI_INTER_2))
+QEMU_BUILD_OBJS := $(addprefix $(QEMU_BUILD_DIR)/, $(QEMU_INTER_2))
+
+PI_TARGET   := $(PI_BUILD_DIR)/kernel
+QEMU_TARGET := $(QEMU_BUILD_DIR)/kernel
+
 
 #----- Make Commands -----#
 
-all: kernel.img
+all: pi qemu test
+
+pi: kernel7.img
+
+qemu: kernel.bin
 
 test: test.o
 	gcc test.o -o test
+
+depend: .pi-depend .qemu-depend
 
 clean:
 	rm -f *.o
@@ -46,46 +59,67 @@ clean:
 	rm -f *.img
 	rm -f *.bc
 	rm -f *.clang.s
+	rm -f .*depend
+	rm -f .*.bak
 	rm -f test
+	rm -rf $(PI_BUILD_DIR)
+	rm -rf $(QEMU_BUILD_DIR)
 
 
 #----- Products -----#
 
-kernel.img: linkscript main.o asm_utils.o entry.o framebuffer.o \
-            led.o mbox.o screen.o utils.o
-	$(ARMGNU)-ld entry.o main.o asm_utils.o framebuffer.o led.o \
-		mbox.o screen.o utils.o -T linkscript -o main.elf
-	$(ARMGNU)-objdump -D main.elf > main.list
-	$(ARMGNU)-objcopy main.elf -O ihex main.hex
-	$(ARMGNU)-objcopy main.elf -O binary kernel7.img
+kernel7.img: $(PI_BUILD_OBJS) linkscript
+	$(ARMGNU)-ld $(PI_BUILD_OBJS) -T linkscript -o $(PI_TARGET).elf
+	$(ARMGNU)-objdump -D $(PI_TARGET).elf > $(PI_TARGET).list
+	$(ARMGNU)-objcopy $(PI_TARGET).elf -O ihex $(PI_TARGET).hex
+	$(ARMGNU)-objcopy $(PI_TARGET).elf -O binary kernel7.img
+
+kernel.bin: $(QEMU_BUILD_OBJS) qemu-linkscript
+	$(ARMGNU)-ld $(QEMU_BUILD_OBJS) -T qemu-linkscript -o $(QEMU_TARGET).elf
+	$(ARMGNU)-objdump -D $(QEMU_TARGET).elf > $(QEMU_TARGET).list
+	$(ARMGNU)-objcopy $(QEMU_TARGET).elf -O ihex $(QEMU_TARGET).hex
+	$(ARMGNU)-objcopy $(QEMU_TARGET).elf -O binary kernel.bin
+
+
+#----- Track Dependencies -----#
+
+.pi-depend: $(PI_SRC)
+	rm -f .pi-depend
+	$(ARMGNU)-gcc $(PI_CC_OPS) -MM $^ > ./.pi-depend
+	sed -i.bak 's .*.o $(PI_BUILD_DIR)/& ' .pi-depend
+	rm -f .pi-depend.bak
+
+.qemu-depend: $(QEMU_SRC)
+	rm -f .qemu-depend
+	$(ARMGNU)-gcc $(QEMU_CC_OPS) -MM $^ > ./.qemu-depend
+	sed -i.bak 's .*.o $(QEMU_BUILD_DIR)/& ' .qemu-depend
+	rm -f .qemu-depend.bak
+
+-include .pi-depend .qemu-depend
 
 
 #----- Object Files -----#
 
-main.o: main.c globals.h framebuffer.h led.h mbox.h screen.h \
-        utils.h image_data.h
-	$(ARMGNU)-gcc $(CCOPS) -c main.c -o main.o
+$(PI_BUILD_DIR)/%.o: %.c | $(PI_BUILD_DIR)
+	$(ARMGNU)-gcc $(PI_CC_OPS) -c $< -o $@
 
-asm_utils.o: asm_utils.s
-	$(ARMGNU)-as asm_utils.s -o asm_utils.o
+$(PI_BUILD_DIR)/%.o: %.s | $(PI_BUILD_DIR)
+	$(ARMGNU)-as $(PI_S_OPS) $< -o $@
 
-entry.o: entry.s
-	$(ARMGNU)-as entry.s -o entry.o
+$(QEMU_BUILD_DIR)/%.o: %.c | $(QEMU_BUILD_DIR)
+	$(ARMGNU)-gcc $(QEMU_CC_OPS) -c $< -o $@
 
-framebuffer.o: framebuffer.c framebuffer.h globals.h mbox.h
-	$(ARMGNU)-gcc $(CCOPS) -c framebuffer.c -o framebuffer.o
+$(QEMU_BUILD_DIR)/%.o: %.s | $(QEMU_BUILD_DIR)
+	$(ARMGNU)-as $(QEMU_S_OPS) $< -o $@
 
-led.o: led.c led.h globals.h
-	$(ARMGNU)-gcc $(CCOPS) -c led.c -o led.o
+test.o: test.c
+	gcc -g -c test.c -o test.o
 
-mbox.o: mbox.c mbox.h globals.h
-	$(ARMGNU)-gcc $(CCOPS) -c mbox.c -o mbox.o
 
-screen.o: screen.c screen.h teletext.h
-	$(ARMGNU)-gcc $(CCOPS) -c screen.c -o screen.o
+#----- Build Directories -----$
 
-utils.o: utils.c utils.h globals.h
-	$(ARMGNU)-gcc $(CCOPS) -c utils.c -o utils.o
+$(PI_BUILD_DIR):
+	mkdir -p $(PI_BUILD_DIR)
 
-test.o: test.c teletext.h
-	gcc -c test.c -o test.o
+$(QEMU_BUILD_DIR):
+	mkdir -p $(QEMU_BUILD_DIR)

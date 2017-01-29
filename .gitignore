@@ -1,4 +1,3 @@
-.vagrant
 # Build Files
 *.a
 *.bc
@@ -9,7 +8,12 @@
 *.img
 *.list
 *.o
+test
 
 # Temp Files
 .*.sw*
 *~
+
+# Hidden Files
+.vagrant
+.*depend
