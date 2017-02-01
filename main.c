@@ -8,9 +8,40 @@
 #include "framebuffer.h"
 #include "led.h"
 #include "tty.h"
-
+#include "io-x86.h"
 #include "image_data.h"
+#include "teletext.h"
+#include "PS2.h"
 
+void printDigit(int dig){ 
+    char codes[] = "0123456789ABCDEF";
+    terminal_putchar(codes[dig]);
+}
+
+void printHex(int num) {
+    int tmp = num;
+    if (num < 0x10) {
+        printDigit(num); 
+        return;
+    }
+    else {
+        printHex  (num / 0x10);
+        printDigit (num % 0x10);
+    }    
+}
+
+void printNum(int num) {
+    int tmp = num;
+    if (num < 10) {
+        printDigit(num); 
+        return;
+    }
+    else {
+        printNum  (num / 10);
+        printDigit(num % 10);
+    }    
+
+}
 
 /* Main function for the kernel - never returns */
 void kernel_main(void)
@@ -20,15 +51,15 @@ void kernel_main(void)
     // Initialize modules
     terminal_init();
     led_init();
+    PS2_init();
 
     // Write a string to the terminal
     terminal_writestring("Hello World!\nThis is a new line. "
-            "This is a tab\tAnd here's another.\tYay!!!!!!!\t:-)");
+            "This is a tab\tAnd here's another.\tYay!!!!!!!\t:-)\n");
 
-    // Blink a bunch
-    num_blinks = 20;
-    while (num_blinks-- > 0)
-        led_blink();
+    while(1) {
+        terminal_putchar(PS2_readChar());
+    }
 
     // Hang forever
     while(TRUE);

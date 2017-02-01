@@ -12,7 +12,7 @@ ARM_CC_OPS := -Wall -nostdlib -nostartfiles -ffreestanding \
          	  -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7-a \
          	  -mtune=cortex-a7
 ARM_S_OPS  :=
-X86_CC_OPS := -m32 -std=gnu99 -ffreestanding -O2 -Wextra -Wall
+X86_CC_OPS := -m32 -std=gnu99 -ffreestanding -O2 -Wextra -Wall -DARCH_X86
 X86_S_OPS  := --32
 
 DRIVERS_DIR := drivers
@@ -28,7 +28,7 @@ PI_SRC   := $(ARM_SRC_DIR)/boot.s main.c $(ARM_SRC_DIR)/asm_utils.s \
 			framebuffer.c mbox.c utils.c $(DRIVERS_DIR)/led_pi2.c \
 			$(DRIVERS_DIR)/tty_stub.c
 QEMU_SRC := $(X86_SRC_DIR)/boot.s main.c utils.c \
-			$(DRIVERS_DIR)/led_stub.c $(DRIVERS_DIR)/vga_x86.c
+			$(DRIVERS_DIR)/led_stub.c $(DRIVERS_DIR)/vga_x86.c $(DRIVERS_DIR)/ps2-x86.c
 
 
 #----- Derived Variables (LEAVE ALONE) -----#
