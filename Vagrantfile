@@ -71,5 +71,7 @@ Vagrant.configure(2) do |config|
      sudo apt-get -y install qemu-system-x86
      sudo apt-get -y install gcc-arm-none-eabi
      sudo apt-get -y install gdb-arm-none-eabi
+     echo "cd /vagrant" >> /home/vagrant/.bashrc
+     echo "source /vagrant/commands.sh" >> /home/vagrant/.bashrc
   SHELL
 end

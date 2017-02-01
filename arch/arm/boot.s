@@ -1,4 +1,4 @@
-@ entry.s
+@ boot.s
 @
 @ Description: Entry point for the kernel
 

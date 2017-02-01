@@ -7,11 +7,9 @@
 #include "globals.h"
 #include "framebuffer.h"
 #include "led.h"
-#include "screen.h"
 #include "tty.h"
 
 #include "image_data.h"
-#include "teletext.h"
 
 
 /* Main function for the kernel - never returns */
@@ -20,10 +18,12 @@ void kernel_main(void)
     int num_blinks;
 
     // Initialize modules
-    terminal_initialize();
+    terminal_init();
     led_init();
 
-    terminal_writestring("Hello World!");
+    // Write a string to the terminal
+    terminal_writestring("Hello World!\nThis is a new line. "
+            "This is a tab\tAnd here's another.\tYay!!!!!!!\t:-)");
 
     // Blink a bunch
     num_blinks = 20;

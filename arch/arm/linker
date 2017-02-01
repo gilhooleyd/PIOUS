@@ -1,4 +1,4 @@
-/* linkscript
+/* linker
  *
  * Description: Custom linker script for the kernel.
  *              Defines memory and section locations.
@@ -11,55 +11,49 @@ ENTRY(_start)
 
 SECTIONS
 {
-    /* Start memory at 0x8000 */    
+    /* Start putting sections at 0x8000 */
     . = 0x8000;
     __start = .;
-    
-    
-    /* START .text (kernel code) SECTION */
+
+
+    /* Start .text (kernel code) SECTION */
     __text_start = .;
-    .text :
+    .text BLOCK(4K) : ALIGN(4K)
     {
         /* Put boot section (in boot.s) first */
         KEEP(*(.text.boot))
 
-        /* Then include the rest of the .text section*/
+        /* Then include the rest of the .text section */
         *(.text)
     }
-
-    /* Align to page size */
-    . = ALIGN(4096);
     __text_end = .;
- 
 
-    /* START .rodata (read-only data) SECTION */
+
+    /* Start .rodata (read-only data) SECTION */
     __rodata_start = .;
-    .rodata :
+    .rodata BLOCK(4K) : ALIGN(4K)
     {
         *(.rodata)
     }
-    . = ALIGN(4096);
     __rodata_end = .;
- 
+
 
     /* Start .data (dynamic allocations) SECTION */
     __data_start = .;
-    .data :
+    .data BLOCK(4K) : ALIGN(4K)
     {
         *(.data)
     }
-    . = ALIGN(4096);
     __data_end = .;
- 
+
 
     /* Start .bss (static allocations) SECTION */
     __bss_start = .;
-    .bss :
+    .bss BLOCK(4K) : ALIGN(4K)
     {
         bss = .;
         *(.bss)
     }
-    . = ALIGN(4096);
     __bss_end = .;
 
 

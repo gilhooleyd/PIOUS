@@ -1,43 +1,56 @@
-/* The bootloader will look at this image and start execution at the symbol
-   designated as the entry point. */
+/* linker
+ *
+ * Description: Custom linker script for the kernel.
+ *              Defines memory and section locations.
+ */
+
+
+/* Defines the entry point for the kernel */
 ENTRY(_start)
 
-/* Tell where the various sections of the object files will be put in the final
-   kernel image. */
+
 SECTIONS
 {
-	/* Begin putting sections at 1 MiB, a conventional place for kernels to be
-	   loaded at by the bootloader. */
+    /* Start putting sections at 1 MiB */
 	. = 1M;
+    __start = .;
 
-	/* First put the multiboot header, as it is required to be put very early
-	   early in the image or the bootloader won't recognize the file format.
-	   Next we'll put the .text section. */
+    /* Start .text (kernel code) SECTION */
+    __text_start = .;
 	.text BLOCK(4K) : ALIGN(4K)
 	{
+        /* Put multiboot header first */
 		*(.multiboot)
+
+        /* Then include the rest of the .text section */
 		*(.text)
 	}
+    __text_end = .;
 
-	/* Read-only data. */
+	/* Start .rodata (read-only data) SECTION */
+    __rodata_start = .;
 	.rodata BLOCK(4K) : ALIGN(4K)
 	{
 		*(.rodata)
 	}
+    __rodata_end = .;
 
-	/* Read-write data (initialized) */
+	/* Start .data (dynamic allocations) SECTION */
+    __data_start = .;
 	.data BLOCK(4K) : ALIGN(4K)
 	{
 		*(.data)
 	}
+    __data_end = .;
 
-	/* Read-write data (uninitialized) and stack */
+	/* Start .bss (static allocations) SECTION */
+    __bss_start = .;
 	.bss BLOCK(4K) : ALIGN(4K)
 	{
 		*(COMMON)
 		*(.bss)
 	}
+    __bss_end = .;
 
-	/* The compiler may produce other sections, by default it will put them in
-	   a segment with the same name. Simply add stuff here as needed. */
+    __end = .;
 }
