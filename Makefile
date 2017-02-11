@@ -15,11 +15,11 @@ ARM_S_OPS  :=
 X86_CC_OPS := -m32 -std=gnu99 -ffreestanding -O2 -Wextra -Wall -DARCH_X86
 X86_S_OPS  := --32
 
-DRIVERS_DIR := drivers
-INCLUDE_DIR := include
-
 ARM_SRC_DIR := arch/arm
 X86_SRC_DIR := arch/x86
+
+DRIVERS_DIR := drivers
+INCLUDE_DIR := include
 
 PI_BUILD_DIR   := build_pi
 QEMU_BUILD_DIR := build_qemu
@@ -27,8 +27,8 @@ QEMU_BUILD_DIR := build_qemu
 PI_SRC   := $(ARM_SRC_DIR)/boot.s main.c $(ARM_SRC_DIR)/asm_utils.s \
 			framebuffer.c mbox.c utils.c $(DRIVERS_DIR)/led_pi2.c \
 			$(DRIVERS_DIR)/tty_stub.c
-QEMU_SRC := $(X86_SRC_DIR)/boot.s main.c utils.c \
-			$(DRIVERS_DIR)/led_stub.c $(DRIVERS_DIR)/vga_x86.c $(DRIVERS_DIR)/ps2-x86.c
+QEMU_SRC := $(X86_SRC_DIR)/boot.s main.c utils.c $(DRIVERS_DIR)/led_stub.c \
+			$(DRIVERS_DIR)/vga_x86.c $(DRIVERS_DIR)/ps2-x86.c
 
 
 #----- Derived Variables (LEAVE ALONE) -----#
