@@ -3,7 +3,6 @@
  * Description: Defines the kernel main function.
  */
 
-
 #include "globals.h"
 #include "framebuffer.h"
 #include "led.h"
@@ -13,35 +12,7 @@
 #include "teletext.h"
 #include "PS2.h"
 #include "uart.h"
-
-struct fb_screen_t *main_screen;
-
-void printDigit(int dig){ 
-    char codes[] = "0123456789ABCDEF";
-    terminal_putchar(main_screen, codes[dig]);
-}
-
-void printHex(int num) {
-    if (num < 0x10) {
-        printDigit(num); 
-        return;
-    }
-    else {
-        printHex  (num / 0x10);
-        printDigit (num % 0x10);
-    }    
-}
-
-void printNum(int num) {
-    if (num < 10) {
-        printDigit(num); 
-        return;
-    }
-    else {
-        printNum  (num / 10);
-        printDigit(num % 10);
-    }    
-}
+#include "stdio.h"
 
 /* Main function for the kernel - never returns */
 void kernel_main(void)
@@ -55,6 +26,8 @@ void kernel_main(void)
     uart_puts("Hello World!\n");
     terminal_init(&hdmi);
     terminal_writestring(main_screen, "Hello World!");
+    terminal_putchar(main_screen, '1');
+    printNum(1910);
 //    led_init();
 //    PS2_init();
 

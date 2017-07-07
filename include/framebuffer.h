@@ -9,7 +9,6 @@
 
 #include "globals.h"
 
-
 /* Constants */
 enum
 {
@@ -74,7 +73,6 @@ struct fb_info_t
     unsigned int size;
 };
 typedef struct fb_info_t fb_info_t;
-
 
 /* Frame buffer methods */
 bool_t fb_init(void);

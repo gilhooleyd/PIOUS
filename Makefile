@@ -29,6 +29,7 @@ PI_SRC   := $(ARM_SRC_DIR)/boot.s main.c $(ARM_SRC_DIR)/asm_utils.s \
 			$(DRIVERS_DIR)/hdmi_pi2.c \
 			$(DRIVERS_DIR)/framebuffer.c \
 			$(DRIVERS_DIR)/uart_pi2.c \
+			libs/stdio.c \
 #			$(DRIVERS_DIR)/tty_stub.c
 
 QEMU_SRC := $(X86_SRC_DIR)/boot.s main.c utils.c $(DRIVERS_DIR)/led_stub.c \
