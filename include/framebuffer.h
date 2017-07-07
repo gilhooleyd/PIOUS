@@ -26,6 +26,18 @@ enum
     FB_HEIGHT   = 480,
 };
 
+struct fb_t {
+    unsigned int fb_width;
+    unsigned int fb_height;
+    unsigned int fb_addr;
+} fb_t;
+
+struct fb_screen_t {
+    struct fb_t info;
+    int write_x; 
+    int write_y;
+    int font_size;
+};
 
 /* Defines the parameters of the frame buffer. *
  * Gets passed to and modified by the GPU.     */

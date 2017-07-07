@@ -12,13 +12,14 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include "framebuffer.h" 
 
 
-bool_t terminal_init(void);
-bool_t terminal_is_initialized(void);
-void terminal_putchar(char c);
-void terminal_write(const char* data, size_t size);
-void terminal_writestring(const char* data);
+bool_t terminal_init(struct fb_screen_t *fb);
+bool_t terminal_is_initialized(struct fb_screen_t *fb);
+void terminal_putchar(struct fb_screen_t *fb, char c);
+void terminal_write(struct fb_screen_t *fb, const char* data, int size);
+void terminal_writestring(struct fb_screen_t *fb, const char* data);
  
 
 #endif

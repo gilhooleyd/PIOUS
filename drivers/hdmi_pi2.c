@@ -14,6 +14,7 @@
 #include "tty.h" 
 #include "barrier.h" 
 #include "uart.h" 
+#include "framebuffer.h" 
 
 #define MB_ADDR 0x3F00B880
 #define MB_STATUS_OFF 0x18
@@ -82,44 +83,10 @@ unsigned int MailboxRead ( unsigned int channel )
 #define CHARSIZE_Y 10
 #define COLOR_BLACK 0x00000000
 #define COLOR_WHITE 0xFFFFFFFF
-static unsigned int screenbase;
-static unsigned int fb_x, fb_y, pitch;
-static unsigned int write_x, write_y;
 
-// this char function assumes that each character is 5 bits across
-// and 9 bits down
-void writechar(int x_loc, int y_loc, int letter) { //char * ch) {
-    unsigned int cursor = screenbase  
-        + (x_loc * 5 * 4) 
-        + (y_loc * 9 * fb_x * 4);
-    int r, c;
-
-    for (c = 0; c < 9; c++) {
-        for (r = 4; r >= 0; r--) {
-            if (teletext[letter - 32][c] & (1 << r)) {
-                PUT32(cursor, COLOR_WHITE);
-                uart_puts("*");
-            }   
-            else {
-                PUT32(cursor, COLOR_BLACK);
-                uart_puts(" ");
-            }
-            cursor += 4;
-        }
-        uart_puts("\n");
-        cursor -= 4*5;
-        cursor += 4*fb_x;
-    }
-}
-
-bool_t terminal_init(void) {
-    unsigned int ra,rb;
-    unsigned int ry,rx;
+bool_t terminal_init(struct fb_screen_t *fb) {
+    unsigned int rb;
     unsigned int mb_addr = MB_STRUCT_ADDR;
-    int i;
-
-    int blink = 20;
-    char *ch = "Hello World!";
 
     mb_addr = MB_STRUCT_ADDR;
     // create the structure to be passed to the mailbox
@@ -154,41 +121,15 @@ bool_t terminal_init(void) {
     // read the location of the framebuffer
     rb = GET32(mb_addr + 0x20);
     rb = rb & 0x3FFFFFFF;
-    screenbase = rb;
+    fb->info.fb_addr = rb;
 
-    fb_x = WIDTH;
-    fb_y = HEIGHT;
-
-    write_x = 0;
-    write_y = 0;
+    fb->info.fb_width = WIDTH;
+    fb->info.fb_height = HEIGHT;
+    fb->write_x = 0;
+    fb->write_y = 0;
+    fb->font_size = 1;
 
     return(0);
 }
 
-bool_t terminal_is_initialized(void) {return FALSE;}
-
-void inc_terminal_column() {
-   if (++write_x == WIDTH) {
-        write_x = 0;
-        if (++write_y == HEIGHT) {
-            write_y = 0;
-        }
-   }
-}
-
-void terminal_putchar(char c) {
-    writechar(write_x, write_y, c);
-    inc_terminal_column();
-}
-
-void terminal_write(const char* data, size_t size) {
-    int i;
-    for (i = 0; i < size; i++)
-        terminal_putchar(data[i]);
-}
-void terminal_writestring(const char* data) {
-    while (*data != '\0'){
-        terminal_putchar(*data);
-        data++;
-    }
-}
+bool_t terminal_is_initialized(struct fb_screen_t *fb) {return FALSE;}

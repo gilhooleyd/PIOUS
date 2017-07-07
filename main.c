@@ -14,13 +14,14 @@
 #include "PS2.h"
 #include "uart.h"
 
+struct fb_screen_t *main_screen;
+
 void printDigit(int dig){ 
     char codes[] = "0123456789ABCDEF";
-    terminal_putchar(codes[dig]);
+    terminal_putchar(main_screen, codes[dig]);
 }
 
 void printHex(int num) {
-    int tmp = num;
     if (num < 0x10) {
         printDigit(num); 
         return;
@@ -32,7 +33,6 @@ void printHex(int num) {
 }
 
 void printNum(int num) {
-    int tmp = num;
     if (num < 10) {
         printDigit(num); 
         return;
@@ -41,18 +41,20 @@ void printNum(int num) {
         printNum  (num / 10);
         printDigit(num % 10);
     }    
-
 }
 
 /* Main function for the kernel - never returns */
 void kernel_main(void)
 {
-    int num_blinks = 5;
+//    int num_blinks = 5;
+    struct fb_screen_t hdmi;
+    main_screen = &hdmi;
 
     // Initialize modules
     uart_init();
     uart_puts("Hello World!\n");
-    terminal_init();
+    terminal_init(&hdmi);
+    terminal_writestring(main_screen, "Hello World!");
 //    led_init();
 //    PS2_init();
 
