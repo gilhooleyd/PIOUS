@@ -12,6 +12,7 @@
 #include "image_data.h"
 #include "teletext.h"
 #include "PS2.h"
+#include "uart.h"
 
 void printDigit(int dig){ 
     char codes[] = "0123456789ABCDEF";
@@ -46,19 +47,25 @@ void printNum(int num) {
 /* Main function for the kernel - never returns */
 void kernel_main(void)
 {
-    int num_blinks;
+    int num_blinks = 5;
 
     // Initialize modules
+    uart_init();
+    uart_puts("Hello World!\n");
     terminal_init();
-    led_init();
-    PS2_init();
+//    led_init();
+//    PS2_init();
+
+//    led_blink();
+//    led_blink();
+//    led_blink();
 
     // Write a string to the terminal
-    terminal_writestring("Hello World!\nThis is a new line. "
-            "This is a tab\tAnd here's another.\tYay!!!!!!!\t:-)\n");
+//    terminal_writestring("Hello World!\nThis is a new line. "
+//            "This is a tab\tAnd here's another.\tYay!!!!!!!\t:-)\n");
 
     while(1) {
-        terminal_putchar(PS2_readChar());
+//        terminal_putchar(PS2_readChar());
     }
 
     // Hang forever
